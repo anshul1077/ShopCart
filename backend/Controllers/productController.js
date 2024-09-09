@@ -1,6 +1,5 @@
 const product = require('../Models/Product')
 
-// add product
 // delete product
 //update product
 
@@ -28,6 +27,31 @@ const getOneProduct = async (req, res) => {
         return res.status(500).json({ message: "Failed to retrieve product." })
     }
 }
+const addProduct = async (req, res) => {
+    try {
+        const data = req.body.data;
+        console.log(data);
+        const newProduct = new product(data);
+        newProduct.save();
+        return res.status(201).json(newProduct)
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Failed to add product." })
+    }
+}
 
-
+const deleteProduct = async (req, res) => {
+    try {
+        const { productID } = req.params
+        const findProduct = await product.findOne({ _id: productID })
+        if (!findProduct) return res.status(404).json({ message: "Product not found" })
+        //DELETE PRODUCT
+        return res.status(200).json({ message: "Product deleted!" });
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Failed to delete product." })
+    }
+}
 module.exports = sayHi
