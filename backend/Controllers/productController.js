@@ -54,4 +54,24 @@ const deleteProduct = async (req, res) => {
         return res.status(500).json({ message: "Failed to delete product." })
     }
 }
+
+const updateProduct = async (req, res) => {
+    try {
+        const { productID } = req.params;
+        const updateData = req.body;
+        const updateProduct = await product.findByIdAndUpdate(
+            productID,
+            { $set : updateData},
+            { new : true}
+        )
+        if (!updateProduct) {
+            return res.status(404).json({message : "product cannot be found!"});
+        }
+        res.status(200).json({message : "your product is successfully updated.."});
+    } 
+    catch(err) {
+        res.status(500).json({message : "failed to update the product", err: err.message});
+    }
+}
 module.exports = sayHi
+module.exports = getAllProducts,getOneProduct,addProduct,deleteProduct, updateProduct;
