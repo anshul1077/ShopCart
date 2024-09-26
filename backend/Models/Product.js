@@ -7,11 +7,11 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     productPrice : {
-        type : int,
+        type : Number,
         required: true
     },
     productRatings : {
-        type : int
+        type : Number
     },
     productVendor: {
         type : String,

@@ -1,6 +1,7 @@
 const express = require('express');
 const connectToDb = require('./config/db');
 const productRoutes = require('./Routes/productRoutes')
+const userRoutes = require('./Routes/userRoutes')
 
 require('dotenv').config()
 const app = express();
@@ -11,5 +12,6 @@ app.listen(port, () => {
 })
 
 app.use('/product', productRoutes)
+app.use('/user', userRoutes)
 app.use(express.json());
 connectToDb();
