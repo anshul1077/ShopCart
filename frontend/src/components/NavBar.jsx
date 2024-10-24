@@ -15,7 +15,7 @@ function NavBar() {
                     <Link to={"/"}><li className="hover:bg-gray-600 p-4 rounded-lg">Home</li></Link>
                     <li className="hover:bg-gray-600 p-4 rounded-lg">About Us</li>
                     <Link to={'/store'}><li className="hover:bg-gray-600 p-4 rounded-lg">Store</li></Link>
-                    <li className="hover:bg-gray-600 p-4 rounded-lg">Contact</li>
+                    <Link to={'/contact'}><li className="hover:bg-gray-600 p-4 rounded-lg">Contact</li></Link>
                 </ul>
             </div>
             <div className="flex justify-between items-center gap-8 mr-9 text-white text-lg cursor-pointer">
