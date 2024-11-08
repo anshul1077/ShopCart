@@ -20,8 +20,8 @@ function NavBar() {
             </div>
             <div className="flex justify-between items-center gap-8 mr-9 text-white text-lg cursor-pointer">
                 <div className="flex justify-center items-center"><p className="mr-2">Eng</p><IoChevronDown /></div>
-                <FaRegUser size={25} />
-                <CiShoppingCart size={35} />
+                <Link to={'/login'}><FaRegUser size={25} /></Link>
+                <Link to={'/userCart'}><CiShoppingCart size={35} /></Link>
             </div>
         </nav>
     )

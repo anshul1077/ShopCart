@@ -5,15 +5,14 @@ const product = require('../Models/Product')
 
 const getAllProducts = async (req, res) => {
     try {
-        //find() -> return all entities
+        // find() -> returns all entities
         const products = await product.find();
-        return res.status(200).json(product)
+        return res.status(200).json(products); // Corrected variable name
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json({ message: "Failed to retrieve products." })
-    }
-}
+        return res.status(500).json({ message: "Failed to retrieve products." });
+    }}
 
 const getOneProduct = async (req, res) => {
     try {
