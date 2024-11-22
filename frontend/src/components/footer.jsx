@@ -46,7 +46,7 @@ const Footer = () => {
         
         <div className="border-t border-gray-700 mt-8 py-4">
           <p className="text-center text-sm text-gray-400">
-            © 2024 Amazon Clone. All rights reserved.
+            © 2024 ShopCart.com. All rights reserved.
           </p>
         </div>
       </div>

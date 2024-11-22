@@ -17,20 +17,34 @@ function Signup() {
         setIsLoading(true);
         setMessage('');
         try {
-            const data = {username: fullName, email: email, password: password}
-            console.log(data)
+            const data = { username: fullName, email: email, password: password };
+            console.log(data);
             const response = await axios.post('http://localhost:8080/user/signup', data);
-            console.log(response.data)
+            console.log(response.data);
             setMessage('Account created successfully!');
             setFullName('');
             setEmail('');
             setPassword('');
         } catch (error) {
-            setMessage('Signup failed. Please try again.');
+            
+            if (error.response) {
+               
+                console.error('Error response:', error.response.data);
+                setMessage(error.response.data.message || 'Signup failed. Please check your input.');
+            } else if (error.request) {
+                
+                console.error('Error request:', error.request);
+                setMessage('No response from the server. Please try again later.');
+            } else {
+                
+                console.error('Error message:', error.message);
+                setMessage('An unexpected error occurred. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     return (
         <div className="flex bg-gray-100">
