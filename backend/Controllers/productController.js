@@ -1,4 +1,5 @@
 const product = require('../Models/Product')
+const user = require('../Models/User');
 
 // delete product
 //update product
@@ -28,17 +29,45 @@ const getOneProduct = async (req, res) => {
 }
 const addProduct = async (req, res) => {
     try {
-        const data = req.body.data;
-        console.log(data);
-        const newProduct = new product(data);
-        newProduct.save();
-        return res.status(201).json(newProduct)
-    }
-    catch (err) {
-        console.log(err);
-        return res.status(500).json({ message: "Failed to add product." })
-    }
+        const { productId, userId } = req.body;
+    
+        // Find the user by userId
+        const User = await user.findById(userId);
+        if (!User) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+    
+        // Check if the product is already in the cart
+        const isProductInCart = User.cart.some((item) => item.productId.toString() === productId);
+        if (isProductInCart) {
+          return res.status(400).json({ message: 'Product already in cart' });
+        }
+    
+
+        User.cart.push({ productId });
+        await User.save();
+    
+        return res.status(200).json({ message: 'Product added to cart', cart: user.cart });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Failed to add product to cart' });
+      }
 }
+
+const viewCart = async (req, res) => {
+    try {
+      const { userId } = req.params; 
+       const User = await user.findById(userId).populate('cart.productId');
+      if (!User) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      return res.status(200).json({ cart: User.cart });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Failed to fetch cart' });
+    }
+  };
 
 const deleteProduct = async (req, res) => {
     try {
@@ -72,4 +101,4 @@ const updateProduct = async (req, res) => {
         res.status(500).json({ message: "failed to update the product", err: err.message });
     }
 }
-module.exports = { getAllProducts, getOneProduct, addProduct, deleteProduct, updateProduct }
+module.exports = {viewCart, getAllProducts, getOneProduct, addProduct, deleteProduct, updateProduct }
