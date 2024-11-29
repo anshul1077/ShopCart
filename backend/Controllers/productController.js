@@ -101,4 +101,32 @@ const updateProduct = async (req, res) => {
         res.status(500).json({ message: "failed to update the product", err: err.message });
     }
 }
-module.exports = {viewCart, getAllProducts, getOneProduct, addProduct, deleteProduct, updateProduct }
+
+const removeFromCart = async (req, res) => {
+    const { userId, productId } = req.params;
+  
+    try {
+      // Example logic to remove a product from a user's cart
+      const user = await User.findById(userId); // Replace with your User model
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Filter out the item to remove it
+      user.cart = user.cart.filter(item => item.productId.toString() !== productId);
+      await user.save();
+  
+      res.status(200).json({ message: 'Item removed from cart', cart: user.cart });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error removing item from cart' });
+    }
+  };
+  
+  module.exports = {
+    // Other controllers...
+    removeFromCart,
+  };
+  
+
+module.exports = {viewCart, getAllProducts, getOneProduct, addProduct, deleteProduct, updateProduct, removeFromCart }

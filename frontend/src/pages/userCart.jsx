@@ -1,56 +1,132 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+const product = require('../Models/Product')
+const user = require('../Models/User');
 
-function UserCart() {
-  const [cartItems, setCartItems] = useState([]);
-  const userId = localStorage.getItem('userId'); // Retrieve userId from localStorage
+// delete product
+//update product
 
-  useEffect(() => {
-    if (userId) {
-      fetchCartItems(userId);
+const getAllProducts = async (req, res) => {
+    try {
+        // find() -> returns all entities
+        const products = await product.find();
+        return res.status(200).json(products); // Corrected variable name
     }
-  }, [userId]);
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Failed to retrieve products." });
+    }}
 
-  const fetchCartItems = (userId) => {
-    axios
-      .get(`http://localhost:8080/product/cart/${userId}`)
-      .then((response) => setCartItems(response.data.cart || []))
-      .catch((err) => console.error(err));
-  };
+const getOneProduct = async (req, res) => {
+    try {
+        const { productID } = req.params
+        const findProduct = await product.findOne({ _id: productID })
+        if (!findProduct) return res.status(404).json({ message: "Product not found" })
+        return res.status(200).json(findProduct)
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Failed to retrieve product." })
+    }
+}
+const addProduct = async (req, res) => {
+    try {
+        const { productId, userId } = req.body;
+    
+        // Find the user by userId
+        const User = await user.findById(userId);
+        if (!User) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+    
+        // Check if the product is already in the cart
+        const isProductInCart = User.cart.some((item) => item.productId.toString() === productId);
+        if (isProductInCart) {
+          return res.status(400).json({ message: 'Product already in cart' });
+        }
+    
 
-  return (
-    <div className="min-h-screen bg-gray-700 flex flex-col items-center justify-center p-6">
-      <div className="bg-indigo-200 p-6 shadow-lg rounded-lg w-full max-w-2xl">
-        <h2 className="text-2xl font-bold mb-6 text-center">Your Cart</h2>
-        {cartItems.length === 0 ? (
-          <p className="text-gray-500 text-center">Your cart is empty.</p>
-        ) : (
-          <ul>
-            {cartItems.map((item) => (
-              <li
-                key={item.productId._id}
-                className="flex flex-col md:flex-row items-center mb-4 border-b pb-4"
-              >
-                {/* Product Image */}
-                <img
-                  src={item.productId.image}
-                  alt={item.productId.name}
-                  className="w-24 h-24 object-cover rounded-lg mb-4 md:mb-0 md:mr-4"
-                />
-                
-                {/* Product Details */}
-                <div className="flex flex-col w-full">
-                  <span className="font-medium text-lg">{item.productId.name}</span>
-                  <span className="text-gray-600">Price: ${item.productId.price}</span>
-                  <span className="text-gray-600">Color: {item.productId.color}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
+        User.cart.push({ productId });
+        await User.save();
+    
+        return res.status(200).json({ message: 'Product added to cart', cart: user.cart });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Failed to add product to cart' });
+      }
 }
 
-export default UserCart;
+const viewCart = async (req, res) => {
+    try {
+      const { userId } = req.params; 
+       const User = await user.findById(userId).populate('cart.productId');
+      if (!User) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      return res.status(200).json({ cart: User.cart });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Failed to fetch cart' });
+    }
+  };
+
+const deleteProduct = async (req, res) => {
+    try {
+        const { productID } = req.params
+        const findProduct = await product.findOne({ _id: productID })
+        if (!findProduct) return res.status(404).json({ message: "Product not found" })
+        //DELETE PRODUCT
+        return res.status(200).json({ message: "Product deleted!" });
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Failed to delete product." })
+    }
+}
+
+const updateProduct = async (req, res) => {
+    try {
+        const { productID } = req.params;
+        const updateData = req.body;
+        const updateProduct = await product.findByIdAndUpdate(
+            productID,
+            { $set: updateData },
+            { new: true }
+        )
+        if (!updateProduct) {
+            return res.status(404).json({ message: "product cannot be found!" });
+        }
+        res.status(200).json({ message: "your product is successfully updated.." });
+    }
+    catch (err) {
+        res.status(500).json({ message: "failed to update the product", err: err.message });
+    }
+}
+
+const removeFromCart = async (req, res) => {
+    const { userId, productId } = req.params;
+  
+    try {
+      // Example logic to remove a product from a user's cart
+      const user = await User.findById(userId); // Replace with your User model
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Filter out the item to remove it
+      user.cart = user.cart.filter(item => item.productId.toString() !== productId);
+      await user.save();
+  
+      res.status(200).json({ message: 'Item removed from cart', cart: user.cart });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error removing item from cart' });
+    }
+  };
+  
+  module.exports = {
+    // Other controllers...
+    removeFromCart,
+  };
+  
+
+module.exports = {viewCart, getAllProducts, getOneProduct, addProduct, deleteProduct, updateProduct, removeFromCart }
